@@ -1,24 +1,26 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import MemoList from './components/MemoList';
+import AddMemo from './components/AddMemo';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
+        <h1>📝 DotDotDot 메모앱</h1>
+
+        {/* 네비게이션 */}
+        <nav style={{ marginBottom: '1rem' }}>
+          <Link to="/" style={{ marginRight: '1rem' }}>📋 메모 목록</Link>
+          <Link to="/add">➕ 메모 추가</Link>
+        </nav>
+
+        {/* 페이지 라우트 */}
+        <Routes>
+          <Route path="/" element={<MemoList />} />
+          <Route path="/add" element={<AddMemo />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
