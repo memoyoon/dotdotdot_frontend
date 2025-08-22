@@ -1,0 +1,5 @@
+{
+  "chat.checkpoints.enabled": true,     
+  "chat.todoListTool.enabled": true,     
+  "chat.math.enabled": true             
+}

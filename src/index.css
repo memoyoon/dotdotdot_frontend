@@ -1,0 +1,33 @@
+/* 시스템 폰트 & 스무딩 */
+:root {
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, "Apple SD Gothic Neo", "Noto Sans KR",
+    "Apple Color Emoji", "Segoe UI Emoji";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 포커스 링 최소화 (접근성 고려되면 조절) */
+*:focus-visible {
+  outline: none;
+}
+
+/* 스크롤바 미니멀 (WebKit) */
+*::-webkit-scrollbar {
+  width: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: rgba(0,0,0,0.15);
+}
+html.dark *::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
+}
+
+/* iOS 안전영역 대비 (이미 Tailwind 클래스에서 사용 중) */
+body {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
