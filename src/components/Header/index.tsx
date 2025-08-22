@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Calendar as CalendarIcon, Clock, Tag, Edit3 } from 'react-feather';
+import { Calendar as CalendarIcon, Clock, Tag, Edit3, List } from 'react-feather';
 
 export default function Header() {
   const { pathname } = useLocation();
@@ -25,7 +25,8 @@ export default function Header() {
       </Link>
 
       <nav className="flex items-center gap-2">
-        {navItem('/', 'Notes', <Edit3 size={20} />)}
+  {navItem('/', 'Notes', <Edit3 size={20} />)}
+  {navItem('/notes', 'List', <List size={20} />)}
         {navItem('/timetable', 'Timetable', <Clock size={20} />)}
         {navItem('/calendar', 'Calendar', <CalendarIcon size={20} />)}
         <button aria-label="Tags" disabled className="p-2 rounded-md text-gray-400 opacity-50 cursor-not-allowed">

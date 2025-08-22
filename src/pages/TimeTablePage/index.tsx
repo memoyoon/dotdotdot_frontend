@@ -78,7 +78,7 @@ export default function TimetablePage() {
   };
 
   return (
-    <main className="max-w-6xl mx-auto px-4 py-6">
+    <main className="max-w-6xl mx-auto p-4">
       <h1 className="text-lg font-semibold mb-4">{fmtHeader(date)}</h1>
       <div className="space-y-3">
         {grouped.map(([hour, notes]) => (

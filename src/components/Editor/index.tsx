@@ -81,7 +81,7 @@ export default function NoteEditor({ selectedNote, onSaved }: Props) {
 
 
     return (
-    <section className="py-6">
+    <section>
       {/* 큰 제목 (아이폰 메모 신규 제목 느낌) */}
       {/* 종이 카드 느낌 */}
       <div
@@ -144,7 +144,7 @@ export default function NoteEditor({ selectedNote, onSaved }: Props) {
 
       {/* 하단 가이드(선택) */}
       <p className="mt-3 text-[12px] text-black/40 dark:text-white/40">
-        메모는 자동 저장되며, 오프라인에서도 입력할 수 있어요.
+        메모는 수동 저장되며, 오프라인에서도 입력할 수 있어요.
       </p>
     </section>
   );
