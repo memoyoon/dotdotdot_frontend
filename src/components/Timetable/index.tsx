@@ -1,4 +1,4 @@
-type Item = { id: string; preview: string };
+type Item = { id: number; preview: string };
 
 function HourBlock({ hour, items }: { hour: string; items: Item[] }) {
   return (
