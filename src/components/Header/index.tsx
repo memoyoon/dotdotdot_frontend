@@ -20,8 +20,9 @@ export default function Header() {
 
   return (
     <header className="w-full flex items-center justify-between px-4 py-3 border-b bg-white/90 dark:bg-neutral-900/80 backdrop-blur-sm">
-      <Link to="/" className="text-lg font-semibold tracking-wide text-gray-900 dark:text-white">
-        Memo
+      <Link to="/" className="flex items-center gap-2">
+        <img src="/icons/dotdotdot.png" alt="dotdotdot" className="h-8 w-auto" />
+        <span className="sr-only">Memo</span>
       </Link>
 
       <nav className="flex items-center gap-2">

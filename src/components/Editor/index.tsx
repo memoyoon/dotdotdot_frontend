@@ -26,7 +26,9 @@ export default function NoteEditor({ selectedNote, onSaved }: Props) {
     // clear draft on successful save
     try { localStorage.removeItem(DRAFT_KEY); } catch { void 0; }
     setStatus('saved');
-    if (onSaved) onSaved();
+  // clear editor and notify parent
+  setValue('');
+  if (onSaved) onSaved();
     // 잠깐 표시 후 idle
     window.setTimeout(() => setStatus('idle'), 800);
   };

@@ -26,6 +26,17 @@ body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI
 .calendar-cell { aspect-ratio: 1/1; border: 1px solid color-mix(in oklab, currentColor 10%, transparent); background: none; border-radius: 10px; }
 .calendar-cell:hover { outline: 1px solid color-mix(in oklab, currentColor 25%, transparent); }
 
+/* responsive months grid used by Calendar component */
+.calendar-months-grid { display: grid; grid-template-columns: repeat(1, 1fr); gap: 12px; }
+
+@media (min-width: 700px) {
+  .calendar-months-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1000px) {
+  .calendar-months-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
 @media (prefers-color-scheme: dark) {
   :root { --bg: #000; --fg: #fff; }
 }

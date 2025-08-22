@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { db } from '../../db/notesDb';
+import { Calendar as CalendarIcon, ChevronDown } from 'react-feather';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -11,15 +12,26 @@ export default function CalendarGrid() {
   const initialYear = Number(params.get('y')) || today.getFullYear();
 
   const [year, setYear] = useState<number>(initialYear);
-  const [showMonths, setShowMonths] = useState(true);
   const [expandedMonth, setExpandedMonth] = useState<number | null>(null); // 1-12
+  const [isNarrow, setIsNarrow] = useState<boolean>(typeof window !== 'undefined' ? window.innerWidth <= 430 : false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onResize = () => setIsNarrow(window.innerWidth <= 430);
+    window.addEventListener('resize', onResize);
+    onResize();
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   const months = useMemo(() => Array.from({ length: 12 }, (_, i) => i + 1), []);
+  const yearOptions = useMemo(() => {
+    const start = year - 5;
+    return Array.from({ length: 11 }, (_, i) => start + i);
+  }, [year]);
 
   function openMonth(m: number) {
-    // open the month detail immediately (hide months grid)
-    setExpandedMonth(m);
-    setShowMonths(false);
+    // toggle expanded month but keep the months grid visible
+    setExpandedMonth((cur) => (cur === m ? null : m));
   }
 
   function handleDateClick(y: number, m: number, d: number) {
@@ -30,82 +42,74 @@ export default function CalendarGrid() {
 
   
 
+  const fmtHeader = (y: number) => {
+    const d = new Date();
+    if (y === d.getFullYear()) return 'Calendar — This year';
+    return `Calendar — ${y}`;
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-4">
       <div className="flex items-center justify-between mb-4">
+        <div>
+          {!isNarrow && <h1 className="text-2xl font-semibold">{fmtHeader(year)}</h1>}
+          <div className="text-sm text-gray-500">Yearly overview</div>
+        </div>
         <div className="flex items-center gap-2">
-          <button
-            className="px-2 py-1 rounded-md bg-gray-100 dark:bg-neutral-800"
-            onClick={() => { setYear((y) => y - 1); }}
-          >
-            ◀
-          </button>
-          <button
-            className="text-lg font-semibold px-3 py-1 rounded hover:bg-gray-50 dark:hover:bg-neutral-800"
-            onClick={() => setShowMonths((s) => !s)}
-          >
-            {year}
-          </button>
-          <button
-            className="px-2 py-1 rounded-md bg-gray-100 dark:bg-neutral-800"
-            onClick={() => { setYear((y) => y + 1); }}
-          >
-            ▶
-          </button>
+          <div className="relative">
+            <select
+              value={year}
+              onChange={(e) => { setYear(Number(e.target.value)); setExpandedMonth(null); }}
+              className="px-4 py-2 rounded-md border bg-white dark:bg-neutral-900 text-base appearance-none pr-10"
+              aria-label="Select year"
+            >
+              {yearOptions.map((yOpt) => (
+                <option key={yOpt} value={yOpt}>{yOpt}</option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center">
+              <ChevronDown size={16} />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Months grid */}
-      {showMonths && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {months.map((m) => (
-            <div key={m} className="border rounded-lg p-3 bg-white dark:bg-neutral-900">
+      {/* Months grid: always visible; nicer card styling */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {months.map((m) => (
+          <div
+            key={m}
+            role="button"
+            tabIndex={0}
+            onClick={() => openMonth(m)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') openMonth(m); }}
+            className={`border rounded-lg bg-white dark:bg-neutral-900 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-150 overflow-hidden ${expandedMonth === m ? 'ring-2 ring-indigo-300 dark:ring-indigo-600' : ''}`}
+            aria-expanded={expandedMonth === m}
+          >
+            <div className="px-4 py-3 bg-gradient-to-r from-gray-100 to-white dark:from-neutral-800 dark:to-neutral-900">
               <div className="flex items-center justify-between">
                 <div className="font-medium text-lg">{MONTH_NAMES[m - 1]}</div>
                 <button
                   className="text-xs text-gray-500"
-                  onClick={() => openMonth(m)}
+                  onClick={(e) => { e.stopPropagation(); openMonth(m); }}
+                  aria-label={`Open ${MONTH_NAMES[m - 1]}`}
                 >
-                  View
+                  <CalendarIcon size={16} />
                 </button>
               </div>
-
-              {/* removed condensed day chips; month card shows only the month label */}
-
-              {/* expanded month detail inline */}
-              {expandedMonth === m ? (
-                <div className="mt-3 border-t pt-3">
-                  <MonthDetail year={year} month={m} onDateClick={handleDateClick} />
-                </div>
-              ) : null}
             </div>
-          ))}
-        </div>
-      )}
 
-      {/* Desktop: when a month is opened, show large detail area */}
-      {!showMonths && expandedMonth ? (
-        <div className="mt-6 w-full">
-          <div className="flex items-center justify-between mb-3">
-            <div className="text-lg font-semibold">{MONTH_NAMES[expandedMonth - 1]} {year}</div>
-            <div className="flex items-center gap-2">
-              <button className="px-2 py-1 rounded-md bg-gray-100 dark:bg-neutral-800" onClick={() => { setShowMonths(true); setExpandedMonth(null); }}>
-                ← Back
-              </button>
+            <div className="p-3">
+              <MonthDetail year={year} month={m} onDateClick={handleDateClick} />
             </div>
           </div>
-          <div className="w-full border rounded-lg p-4 bg-white dark:bg-neutral-900">
-            <MonthDetail year={year} month={expandedMonth} onDateClick={handleDateClick} />
-          </div>
-        </div>
-      ) : null}
-
-  {/* mobile selector removed; always use the months grid or expanded month detail */}
+        ))}
+      </div>
     </div>
   );
 }
 
-function MonthDetail({ year, month, onDateClick }: { year: number; month: number; onDateClick: (y:number,m:number,d:number)=>void }) {
+function MonthDetail({ year, month, onDateClick, compact }: { year: number; month: number; onDateClick: (y:number,m:number,d:number)=>void; compact?: boolean }) {
   const total = daysInMonth(year, month);
   const [marked, setMarked] = useState<Set<string>>(new Set());
 
@@ -142,9 +146,11 @@ function MonthDetail({ year, month, onDateClick }: { year: number; month: number
     weeks.push(cells.slice(i, i + 7));
   }
 
+  const small = Boolean(compact);
+
   return (
-    <div className="mt-2">
-      <div className="grid grid-cols-7 text-xs text-gray-500 mb-2">
+    <div className={`${small ? 'mt-0' : 'mt-2'}`}>
+      <div className="grid grid-cols-7 text-[10px] text-gray-500 mb-1">
         <div className="text-center">Sun</div>
         <div className="text-center">Mon</div>
         <div className="text-center">Tue</div>
@@ -154,14 +160,14 @@ function MonthDetail({ year, month, onDateClick }: { year: number; month: number
         <div className="text-center">Sat</div>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1">
         {weeks.map((week, wi) => (
           <div key={wi} className="grid grid-cols-7 gap-1">
             {week.map((d, di) => (
               d ? (
                 <button
                   key={di}
-                  className={`h-10 rounded-md text-sm text-center ${marked.has(`${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`) ? 'bg-gray-300 dark:bg-neutral-700' : 'bg-gray-50 dark:bg-neutral-800'}`}
+                  className={`w-full ${small ? 'h-8 text-xs' : 'h-10 text-sm'} rounded-md ${marked.has(`${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`) ? 'bg-gray-300 dark:bg-neutral-700' : 'bg-gray-50 dark:bg-neutral-800'}`}
                   onClick={() => onDateClick(year, month, d)}
                 >
                   {d}

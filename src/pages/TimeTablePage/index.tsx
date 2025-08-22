@@ -16,10 +16,16 @@ function build24Hours() {
 }
 
 export default function TimetablePage() {
-  const [params] = useSearchParams();
+  const [params, setSearchParams] = useSearchParams();
   const [items, setItems] = useState<DBNote[]>([]);
+  const [isNarrow, setIsNarrow] = useState<boolean>(false);
 
   const date = params.get('date') ?? new Date().toISOString().slice(0, 10);
+  const todayIso = new Date().toISOString().slice(0, 10);
+
+  function setDateParam(d: string) {
+    setSearchParams({ date: d });
+  }
 
   useEffect(() => {
     let active = true;
@@ -47,6 +53,15 @@ export default function TimetablePage() {
     return () => { active = false; };
   }, [date]);
 
+  // track narrow viewport (<=600px)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onResize = () => setIsNarrow(window.innerWidth <= 600);
+    window.addEventListener('resize', onResize);
+    onResize();
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   const hours = useMemo(() => build24Hours(), []);
 
   const grouped = useMemo(() => {
@@ -73,7 +88,8 @@ export default function TimetablePage() {
       if (d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate()) {
         return 'Today';
       }
-      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+      // English friendly: Weekday, Mon DD, YYYY
+      return d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
     } catch {
       return iso;
     }
@@ -81,7 +97,29 @@ export default function TimetablePage() {
 
   return (
     <main className="max-w-6xl mx-auto p-4">
-      <h1 className="text-lg font-semibold mb-4">{fmtHeader(date)}</h1>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          {!isNarrow && <h1 className="text-2xl font-semibold">{fmtHeader(date)}</h1>}
+          <div className="text-sm text-gray-500">Daily timeline</div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDateParam(e.target.value)}
+            className="px-3 py-2 border rounded-md bg-white dark:bg-neutral-900 text-sm"
+            aria-label="Select date"
+          />
+          <button
+            className="px-3 py-2 rounded-md bg-gray-100 dark:bg-neutral-800 text-sm"
+            onClick={() => setDateParam(todayIso)}
+          >
+            Today
+          </button>
+        </div>
+      </div>
+
       <div className="space-y-3">
         {grouped.map(([hour, notes]) => (
           <HourBlock
