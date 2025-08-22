@@ -6,7 +6,9 @@ import type { Note as DBNote } from '../../db/notesDb';
 
 function build24Hours() {
   const arr: string[] = [];
-  for (let h = 0; h < 24; h++) {
+  // start from 06:00, then 07:00 ... 23:00, 00:00 ... 05:00
+  for (let i = 0; i < 24; i++) {
+    const h = (6 + i) % 24;
     const hh = String(h).padStart(2, '0');
     arr.push(`${hh}:00`);
   }
