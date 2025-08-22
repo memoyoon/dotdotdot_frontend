@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import NoteEditor from '../../components/Editor';
 import NoteList from './NoteList';
+import { db } from '../../db/notesDb';
+import type { Note } from '../../db/notesDb';
 
 export default function NotePage() {
   const [showList, setShowList] = useState(true);
+  const [selected, setSelected] = useState<Note | null>(null);
+  const [refreshSignal, setRefreshSignal] = useState(0);
 
   return (
-  <main className="max-w-6xl mx-auto md:px-4 px-4 py-6">
+  <main className="mx-auto md:px-4 px-4 py-6">
       <div className="flex flex-col md:flex-row items-start gap-6">
         <div className="flex-1 w-full">
           <div className="flex items-center justify-between mb-4">
@@ -22,7 +26,10 @@ export default function NotePage() {
           </div>
 
           <section className="flex-1 w-full">
-            <NoteEditor />
+            <NoteEditor
+              selectedNote={selected}
+              onSaved={() => setRefreshSignal((s) => s + 1)}
+            />
           </section>
         </div>
 
@@ -31,7 +38,15 @@ export default function NotePage() {
           <aside className="w-full md:w-80 shrink-0">
             <div className="sticky top-4 rounded-2xl overflow-hidden">
               <div className="px-4 py-3 bg-white/80 dark:bg-neutral-900/80">Notes</div>
-              <NoteList />
+              <NoteList
+                onSelect={(n) => setSelected(n)}
+                onDelete={async (id) => {
+                  await db.notes.delete(id);
+                  if (selected?.id === id) setSelected(null);
+                  setRefreshSignal((s) => s + 1);
+                }}
+                refreshSignal={refreshSignal}
+              />
             </div>
           </aside>
         ) : null}

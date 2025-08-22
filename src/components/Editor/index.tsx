@@ -1,18 +1,32 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { db } from '../../db/notesDb';
 import type { Note } from '../../db/notesDb';
 
-export default function NoteEditor() {
+type Props = {
+  selectedNote?: Note | null;
+  onSaved?: () => void;
+};
+
+export default function NoteEditor({ selectedNote, onSaved }: Props) {
   const [value, setValue] = useState('');
   const [status, setStatus] = useState<'idle'|'saving'|'saved'>('idle');
-  const timerRef = useRef<number | null>(null);
+  // timerRef and debouncedSave removed for manual save flow
+
+  const DRAFT_KEY = 'dotdotdot:draft';
 
   const saveNote = async (text: string) => {
     if (!text.trim()) return;
     setStatus('saving');
-    const note: Note = { content: text, at: new Date().toISOString(), synced: false };
-    await db.notes.add(note);
+    const now = new Date().toISOString();
+    if (selectedNote && selectedNote.id != null) {
+      await db.notes.update(selectedNote.id, { content: text, at: now });
+    } else {
+      await db.notes.add({ content: text, at: now, synced: false });
+    }
+    // clear draft on successful save
+    try { localStorage.removeItem(DRAFT_KEY); } catch { void 0; }
     setStatus('saved');
+    if (onSaved) onSaved();
     // 잠깐 표시 후 idle
     window.setTimeout(() => setStatus('idle'), 800);
   };
@@ -39,12 +53,9 @@ export default function NoteEditor() {
     }
   };
 
-  // 디바운스로 저장 시도
-  const debouncedSave = (text: string) => {
-    if (timerRef.current) window.clearTimeout(timerRef.current);
-    timerRef.current = window.setTimeout(() => {
-      saveNote(text);
-    }, 600);
+  // drafts persisted locally until user clicks Save
+  const persistDraft = (text: string) => {
+    try { localStorage.setItem(DRAFT_KEY, text); } catch { void 0; }
   };
 
   useEffect(() => {
@@ -53,16 +64,25 @@ export default function NoteEditor() {
     window.addEventListener('online', onOnline);
     return () => {
       window.removeEventListener('online', onOnline);
-      if (timerRef.current) window.clearTimeout(timerRef.current);
     };
   }, []);
+
+  // when selected note changes, populate editor; if no selected note, restore draft
+  useEffect(() => {
+    if (selectedNote) {
+      setValue(selectedNote.content || '');
+    } else {
+      try {
+        const draft = localStorage.getItem(DRAFT_KEY);
+        if (draft) setValue(draft);
+      } catch { void 0; }
+    }
+  }, [selectedNote]);
 
 
     return (
     <section className="py-6">
       {/* 큰 제목 (아이폰 메모 신규 제목 느낌) */}
-    {/* 중심 카드 느낌 */}
-
       {/* 종이 카드 느낌 */}
       <div
         className="
@@ -88,7 +108,7 @@ export default function NoteEditor() {
             value={value}
             onChange={(e) => {
               setValue(e.target.value);
-              debouncedSave(e.target.value);
+              persistDraft(e.target.value);
             }}
           />
 
@@ -98,6 +118,13 @@ export default function NoteEditor() {
               {value.length.toLocaleString()} chars
             </div>
             <div className="flex items-center gap-2">
+              <button
+                className="px-3 py-1 rounded-md bg-gray-100 dark:bg-neutral-800 text-sm"
+                onClick={() => void saveNote(value)}
+                aria-label="Save note"
+              >
+                Save
+              </button>
               <span
                 className={
                   status === 'saving'
@@ -108,7 +135,7 @@ export default function NoteEditor() {
                 }
               >
                 {status === 'saving' && <span className="animate-pulse">●</span>}
-                {status === 'saving' ? '저장 중…' : status === 'saved' ? '저장됨' : '자동 저장'}
+                {status === 'saving' ? '저장 중…' : status === 'saved' ? '저장됨' : '수동 저장'}
               </span>
             </div>
           </div>
