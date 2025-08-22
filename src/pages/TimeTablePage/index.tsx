@@ -23,9 +23,20 @@ export default function TimetablePage() {
     let active = true;
     (async () => {
       try {
-        // load notes from local DB, fallback to empty
         const all = await db.notes.toArray();
-        const filtered = all.filter((n) => n.at && n.at.startsWith(date));
+        // keep notes whose local date matches requested date
+        const filtered = all.filter((n) => {
+          try {
+            const d = new Date(n.at || '');
+            // format YYYY-MM-DD in local timezone
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}` === date;
+          } catch {
+            return false;
+          }
+        });
         if (active) setItems(filtered);
       } catch (e) {
         console.error(e);
@@ -40,23 +51,44 @@ export default function TimetablePage() {
     const map = new Map<string, DBNote[]>();
     for (const h of hours) map.set(h, []);
     for (const n of items) {
-      const hour = (n.at || '').slice(11, 13) + ':00';
-      if (!map.has(hour)) map.set(hour, []);
-      map.get(hour)!.push(n);
+      try {
+        const d = new Date(n.at || '');
+        const hh = String(d.getHours()).padStart(2, '0');
+        const hour = `${hh}:00`;
+        if (!map.has(hour)) map.set(hour, []);
+        map.get(hour)!.push(n);
+      } catch {
+        // ignore invalid dates
+      }
     }
     return hours.map((h) => [h, map.get(h) || []] as [string, DBNote[]]);
   }, [items, hours]);
 
+  const fmtHeader = (iso: string) => {
+    try {
+      const d = new Date(iso + 'T00:00:00');
+      const today = new Date();
+      if (d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate()) {
+        return 'Today';
+      }
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch {
+      return iso;
+    }
+  };
+
   return (
-    <main className="page">
-      <h1 className="visually-hidden">Timetable</h1>
-      {grouped.map(([hour, notes]) => (
-        <HourBlock
-          key={hour}
-          hour={hour}
-          items={notes.map((n) => ({ id: n.id ?? 0, preview: (n.content || '').slice(0, 80) }))}
-        />
-      ))}
+    <main className="max-w-6xl mx-auto px-4 py-6">
+      <h1 className="text-lg font-semibold mb-4">{fmtHeader(date)}</h1>
+      <div className="space-y-3">
+        {grouped.map(([hour, notes]) => (
+          <HourBlock
+            key={hour}
+            hour={hour}
+            items={notes.map((n) => ({ id: n.id ?? 0, preview: (n.content || '').slice(0, 80), content: n.content, at: n.at }))}
+          />
+        ))}
+      </div>
     </main>
   );
 }
