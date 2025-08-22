@@ -73,7 +73,7 @@ export default function NoteEditor() {
         "
       >
   {/* 에디터 영역 */}
-  <div className="p-0 sm:p-5 w-full">
+  <div className="p-4 sm:p-5 w-full">
           <textarea
             className="
               block w-full min-h-[46vh]

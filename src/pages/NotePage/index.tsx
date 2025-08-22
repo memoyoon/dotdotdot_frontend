@@ -6,7 +6,7 @@ export default function NotePage() {
   const [showList, setShowList] = useState(true);
 
   return (
-    <main className="max-w-6xl mx-auto md:px-4 px-0 py-6">
+  <main className="max-w-6xl mx-auto md:px-4 px-4 py-6">
       <div className="flex flex-col md:flex-row items-start gap-6">
         <div className="flex-1 w-full">
           <div className="flex items-center justify-between mb-4">
