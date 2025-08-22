@@ -1,70 +1,78 @@
-# Getting Started with Create React App
+# 📝 Memo Timetable
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+“메모 타임테이블 서비스” 
 
-## Available Scripts
+ 순간의 메모를 자동 저장하고, 시간대별로 직관적으로 확인할 수 있는 미니멀 웹앱.
 
-In the project directory, you can run:
+# 📂 프로젝트 구조
+frontend
 
-### `npm start`
+# 🚀 실행 방법
+1. 의존성 설치
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- npm install
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+2. 개발 서버 실행
 
-### `npm test`
+- npm run dev http://localhost:5173
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+3. 프로덕션 빌드
+- npm run build
 
-### `npm run build`
+- npm run preview
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+# ✨ 주요 기능
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. 노트 작성 & 자동 저장
 
-### `npm run eject`
+- NoteEditor에서 입력 → debounce → API 호출
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- 오프라인 시 큐잉/재시도 예정
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+2. 타임테이블 뷰
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- 하루 메모를 시간 단위로 정리해 직관적으로 표시
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- 캘린더 뷰
 
-## Learn More
+- 날짜 선택 시 해당 날짜의 타임테이블 확인
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+3. 홈 화면 추가 (PWA: Add to Home Screen)
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- vite-plugin-pwa 기반 자동 manifest/service worker 생성
 
-### Code Splitting
+- 안드로이드/Chrome: 설치 버튼 지원
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- iOS/Safari: 수동으로 홈 화면에 추가 (안내 배너 예정)
 
-### Analyzing the Bundle Size
+- 인앱 브라우저(Naver, Kakao 등): 외부 브라우저 열기 안내
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+4. 📱 모바일 지원
 
-### Making a Progressive Web App
+- index.html <meta name="viewport">로 반응형 기본 설정
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- 홈 화면 실행 시 앱처럼 전체화면 동작
 
-### Advanced Configuration
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+# 🛠 기술 스택
 
-### Deployment
+- Frontend: React + TypeScript + Vite
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+- Styling: TailwindCSS (예정)
 
-### `npm run build` fails to minify
+- State: React hooks (필요 시 Zustand/Redux 예정)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+PWA: vite-plugin-pwa (자동 manifest / service worker 관리)
+
+- Backend (별도 repo): FastAPI
+
+# 📌 TO DO
+
+ - 오프라인 큐/재시도 처리
+
+ - 다크 모드 자동 적용
+
+ - 태그 기능 추가
+
+ - PWA 오프라인 캐싱 강화
