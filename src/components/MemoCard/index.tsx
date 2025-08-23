@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Trash2 } from 'react-feather';
 import type { Note } from '../../db/notesDb';
+import ConfirmDialog from '../ConfirmDialog';
 
 function fmt(dateIso: string) {
   try {
@@ -27,6 +28,8 @@ export default function MemoCard({
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [overflowing, setOverflowing] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
@@ -50,7 +53,8 @@ export default function MemoCard({
   const expanded = note.id != null && expandedIds.has(note.id);
 
   return (
-    <article
+    <>
+      <article
       key={note.id}
       className="group rounded-xl border border-gray-100 p-3 bg-white shadow-sm relative"
     >
@@ -58,9 +62,9 @@ export default function MemoCard({
       <button
         aria-label="delete"
         className="absolute top-2 right-2 text-gray-400 hover:text-red-500 p-1 rounded"
-        onClick={async (e) => {
+        onClick={(e) => {
           e.stopPropagation();
-          if (onDelete && note.id != null) await onDelete(note.id);
+          setShowConfirm(true);
         }}
       >
         <Trash2 size={14} />
@@ -92,6 +96,25 @@ export default function MemoCard({
           {expanded ? 'Show less' : 'Read more'}
         </button>
       ) : null}
-    </article>
+  </article>
+      <ConfirmDialog
+        open={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        onConfirm={async () => {
+          if (note.id == null || !onDelete) return;
+          try {
+            setLoading(true);
+            await onDelete(note.id);
+          } finally {
+            setLoading(false);
+            setShowConfirm(false);
+          }
+        }}
+        title="이 메모를 삭제하시겠습니까?"
+        confirmLabel="삭제"
+        cancelLabel="취소"
+        loading={loading}
+      />
+    </>
   );
 }
