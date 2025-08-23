@@ -19,6 +19,7 @@ function fmt(dateIso: string) {
 
 export default function NoteList({ onSelect, onDelete, refreshSignal = 0 }: Props) {
   const [notes, setNotes] = useState<Note[]>([]);
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
 
   const load = async () => {
     const arr = await db.notes.orderBy('at').reverse().toArray();
@@ -58,12 +59,41 @@ export default function NoteList({ onSelect, onDelete, refreshSignal = 0 }: Prop
           >
             <Trash2 size={14} />
           </button>
-          <div
-            className="text-sm text-gray-900 dark:text-white line-clamp-3 cursor-pointer"
-            onClick={() => onSelect && onSelect(n)}
-          >
-            {n.content || '—'}
-          </div>
+          {(() => {
+            const text = n.content || '';
+            const limit = 240;
+            const isLong = text.length > limit;
+            const expanded = n.id != null && expandedIds.has(n.id);
+            const short = isLong ? text.slice(0, limit) + '…' : text || '—';
+
+            return (
+              <>
+                <div
+                  className={`text-sm text-gray-900 dark:text-white ${!expanded && isLong ? 'line-clamp-3' : ''} cursor-pointer`}
+                  onClick={() => onSelect && onSelect(n)}
+                >
+                  {expanded ? text : short}
+                </div>
+                {isLong ? (
+                  <button
+                    className="text-xs text-blue-500 mt-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (n.id == null) return;
+                      setExpandedIds((s) => {
+                        const copy = new Set(s);
+                        if (copy.has(n.id!)) copy.delete(n.id!);
+                        else copy.add(n.id!);
+                        return copy;
+                      });
+                    }}
+                  >
+                    {expanded ? 'Show less' : 'Read more'}
+                  </button>
+                ) : null}
+              </>
+            );
+          })()}
         </article>
       ))}
     </div>
