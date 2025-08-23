@@ -15,19 +15,22 @@ export default function NoteEditor({ selectedNote, onSaved }: Props) {
   const DRAFT_KEY = 'dotdotdot:draft';
 
   const saveNote = async (text: string) => {
-    if (!text.trim()) return;
+    // Remove only trailing newlines so interior newlines are preserved.
+    const processed = text.replace(/[\r\n]+$/g, '');
+    if (!processed.trim()) return;
     setStatus('saving');
     const now = new Date().toISOString();
     if (selectedNote && selectedNote.id != null) {
-      await db.notes.update(selectedNote.id, { content: text, at: now });
+      await db.notes.update(selectedNote.id, { content: processed, at: now });
     } else {
-      await db.notes.add({ content: text, at: now, synced: false });
+      await db.notes.add({ content: processed, at: now, synced: false });
     }
     // clear draft on successful save
     try { localStorage.removeItem(DRAFT_KEY); } catch { void 0; }
     setStatus('saved');
   // clear editor and notify parent
   setValue('');
+  // notify parent that a save happened
   if (onSaved) onSaved();
     // 잠깐 표시 후 idle
     window.setTimeout(() => setStatus('idle'), 800);

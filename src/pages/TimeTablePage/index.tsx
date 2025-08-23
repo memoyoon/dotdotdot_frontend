@@ -88,8 +88,11 @@ export default function TimetablePage() {
       if (d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate()) {
         return 'Today';
       }
-      // English friendly: Weekday, Mon DD, YYYY
-      return d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+  // Numeric US: MM/DD/YYYY
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const yyyy = d.getFullYear();
+  return `${mm}/${dd}/${yyyy}`;
     } catch {
       return iso;
     }
@@ -104,19 +107,24 @@ export default function TimetablePage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDateParam(e.target.value)}
-            className="px-3 py-2 border rounded-md bg-white dark:bg-neutral-900 text-sm"
-            aria-label="Select date"
-          />
-          <button
-            className="px-3 py-2 rounded-md bg-gray-100 dark:bg-neutral-800 text-sm"
-            onClick={() => setDateParam(todayIso)}
-          >
-            Today
-          </button>
+          <div className="relative">
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDateParam(e.target.value)}
+              className="px-4 py-2 rounded-md border bg-white dark:bg-neutral-900 text-base appearance-none"
+              aria-label="Select date"
+              style={{ WebkitAppearance: 'none', MozAppearance: 'textfield', appearance: 'none', backgroundImage: 'none' }}
+            />
+          </div>
+          {!isNarrow && (
+            <button
+              className="px-4 py-2 rounded-md bg-gray-100 dark:bg-neutral-800 text-base"
+              onClick={() => setDateParam(todayIso)}
+            >
+              Today
+            </button>
+          )}
         </div>
       </div>
 
