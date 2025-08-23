@@ -14,14 +14,10 @@
 
 /* 스크롤바 미니멀 (WebKit) */
 *::-webkit-scrollbar {
-  width: 8px;
+  width: 0px;
 }
 *::-webkit-scrollbar-thumb {
-  border-radius: 9999px;
-  background: rgba(0,0,0,0.15);
-}
-html.dark *::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.2);
+   background: transparent !important;
 }
 
 /* iOS 안전영역 대비 (이미 Tailwind 클래스에서 사용 중) */

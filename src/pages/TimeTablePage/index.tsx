@@ -99,7 +99,7 @@ export default function TimetablePage() {
   };
 
   return (
-    <main className="max-w-6xl mx-auto p-4">
+    <main className="p-4 mt-16">
       <div className="flex items-center justify-between mb-4">
         <div>
           {!isNarrow && <h1 className="text-2xl font-semibold">{fmtHeader(date)}</h1>}
@@ -107,19 +107,19 @@ export default function TimetablePage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="relative">
+          <div>
             <input
               type="date"
               value={date}
               onChange={(e) => setDateParam(e.target.value)}
-              className="px-4 py-2 rounded-md border bg-white dark:bg-neutral-900 text-base appearance-none"
+              className="px-4 py-2 rounded-md border bg-white text-base appearance-none"
               aria-label="Select date"
               style={{ WebkitAppearance: 'none', MozAppearance: 'textfield', appearance: 'none', backgroundImage: 'none' }}
             />
           </div>
           {!isNarrow && (
             <button
-              className="px-4 py-2 rounded-md bg-gray-100 dark:bg-neutral-800 text-base"
+              className="px-4 py-2 rounded-md bg-gray-100 text-base"
               onClick={() => setDateParam(todayIso)}
             >
               Today

@@ -5,12 +5,6 @@
     <!-- 반응형 기본 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-
-    <!-- 라이트/다크에 따라 브라우저 UI 색상 -->
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
-    <meta name="color-scheme" content="light dark" />
-
     <!-- Android 힌트 -->
     <meta name="mobile-web-app-capable" content="yes" />
 
@@ -49,41 +43,6 @@
           "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
       }
     </style>
-
-   <script>
-  // iOS 상태바 라이트/다크 대응
-  (function () {
-    // 1) 다크 모드 감지용 미디어쿼리
-    const mediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
-
-    // 2) 상태바 메타 태그 확보 (없으면 생성)
-    let statusMeta = document.getElementById("ios-statusbar-meta");
-    if (!statusMeta) {
-      statusMeta = document.createElement("meta");
-      statusMeta.id = "ios-statusbar-meta";
-      statusMeta.name = "apple-mobile-web-app-status-bar-style";
-      document.head.appendChild(statusMeta);
-    }
-
-    // 3) 현재 모드에 맞춰 값 적용 (인자에 의존하지 않고 항상 최신값 조회)
-    const apply = () => {
-      statusMeta.setAttribute(
-        "content",
-        mediaQueryList.matches ? "black" : "default"
-      );
-    };
-
-    // 초기 적용
-    apply();
-
-    // 4) 모드 변경 감지 (신규/구형 WebKit 모두 대응)
-    if (typeof mediaQueryList.addEventListener === "function") {
-      mediaQueryList.addEventListener("change", apply);
-    } else if (typeof mediaQueryList.addListener === "function") {
-      mediaQueryList.addListener(apply);
-    }
-  })();
-</script>
   </head>
   <body>
     <div id="root"></div>

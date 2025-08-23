@@ -9,8 +9,8 @@ export default function Header() {
       <Link
         to={to}
         aria-label={label}
-        className={`p-2 rounded-md flex items-center justify-center transition-colors text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:hover:text-white dark:hover:bg-gray-800 ${
-          active ? 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white' : ''
+        className={`p-2 rounded-md flex items-center justify-center transition-colors text-gray-500 hover:text-gray-900 hover:bg-gray-100 ${
+          active ? 'bg-gray-100 text-gray-900' : ''
         }`}
       >
         {icon}
@@ -19,7 +19,7 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full flex items-center justify-between px-4 py-3 border-b bg-white/90 dark:bg-neutral-900/80 backdrop-blur-sm">
+    <header className="fixed top-0 left-0 right-0 flex items-center justify-between px-4 py-3 border-b bg-white/90 backdrop-blur-sm z-[9999]">
       <Link to="/" className="flex items-center gap-2">
         <img src="/icons/dotdotdot.png" alt="dotdotdot" className="h-8 w-auto" />
         <span className="sr-only">Memo</span>

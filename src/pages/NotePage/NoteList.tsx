@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from 'react';
-import { Trash2 } from 'react-feather';
+import { useEffect, useRef, useState } from 'react';
 import { db } from '../../db/notesDb';
 import type { Note } from '../../db/notesDb';
+import MemoCard from '../../components/MemoCard';
 
 type Props = {
   onSelect?: (note: Note) => void;
@@ -9,28 +9,37 @@ type Props = {
   refreshSignal?: number;
 };
 
-function fmt(dateIso: string) {
-  try {
-    return new Date(dateIso).toLocaleString();
-  } catch {
-    return dateIso;
-  }
-}
 
 export default function NoteList({ onSelect, onDelete, refreshSignal = 0 }: Props) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
-  const collapsePx = 98; // 5줄 기준
-
+  const collapsePx = 98; // ~6rem — visual collapse height
   const load = async () => {
-    const arr = await db.notes.orderBy('at').reverse().toArray();
+    // load in chronological order (oldest -> newest) so newest is rendered at the bottom
+    const arr = await db.notes.orderBy('at').toArray();
     setNotes(arr);
   };
 
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // after notes render, position scroll so the newest items (bottom) appear near the middle
   useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    // run after layout
+    requestAnimationFrame(() => {
+      // scroll so bottom is about halfway up the container
+      const target = Math.max(0, el.scrollHeight - el.clientHeight / 2);
+      el.scrollTop = target;
+    });
+  }, [notes.length]);
+
+  useEffect(() => {
+    // single initial load; switching to refreshSignal-driven updates instead of polling
     load();
-    const id = setInterval(load, 2000);
-    return () => clearInterval(id);
+    return () => {
+      // no-op cleanup (no polling to clear)
+    };
   }, []);
 
   // reload when parent signals a refresh
@@ -43,104 +52,21 @@ export default function NoteList({ onSelect, onDelete, refreshSignal = 0 }: Prop
   }
 
   return (
-    <div className="space-y-2 max-h-[60vh] md:max-h-[70vh] overflow-auto">
-      {notes.map((n) => (
-        <MemoCard
-          key={n.id}
-          note={n}
-          onSelect={onSelect}
-          onDelete={onDelete}
-          expandedIds={expandedIds}
-          setExpandedIds={setExpandedIds}
-          collapsePx={collapsePx}
-        />
-      ))}
-    </div>
-  );
-}
-
-function MemoCard({
-  note,
-  onSelect,
-  onDelete,
-  expandedIds,
-  setExpandedIds,
-  collapsePx,
-}: {
-  note: Note;
-  onSelect?: (note: Note) => void;
-  onDelete?: (id: number) => Promise<void> | void;
-  expandedIds: Set<number>;
-  setExpandedIds: React.Dispatch<React.SetStateAction<Set<number>>>;
-  collapsePx: number;
-}) {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const [overflowing, setOverflowing] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const measure = () => {
-      setOverflowing(el.scrollHeight > collapsePx + 1);
-    };
-    measure();
-    let ro: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== 'undefined') {
-      ro = new ResizeObserver(measure);
-      ro.observe(el);
-    }
-    window.addEventListener('resize', measure);
-    return () => {
-      if (ro) ro.disconnect();
-      window.removeEventListener('resize', measure);
-    };
-  }, [note.content, collapsePx]);
-
-  const expanded = note.id != null && expandedIds.has(note.id);
-
-  return (
-    <article
-      key={note.id}
-      className="group rounded-xl border border-gray-100 dark:border-neutral-800 p-3 bg-white dark:bg-neutral-900 shadow-sm relative"
-    >
-      <div className="text-xs text-gray-400 mb-2">{fmt(note.at)}</div>
-      <button
-        aria-label="delete"
-        className="absolute top-2 right-2 text-gray-400 hover:text-red-500 p-1 rounded"
-        onClick={async (e) => {
-          e.stopPropagation();
-          if (onDelete && note.id != null) await onDelete(note.id);
-        }}
-      >
-        <Trash2 size={14} />
-      </button>
-
-      <div
-        ref={ref}
-        className="text-sm text-gray-900 dark:text-white whitespace-pre-wrap break-words cursor-pointer"
-        onClick={() => onSelect && onSelect(note)}
-        style={!expanded && overflowing ? { maxHeight: `${collapsePx}px`, overflow: 'hidden' } : undefined}
-      >
-        {note.content || '—'}
+    <div className="flex flex-col">
+      <div ref={containerRef} className="space-y-2 max-h-[60vh] md:max-h-[70vh] overflow-auto">
+        {notes.map((n) => (
+          <MemoCard
+            key={n.id}
+            note={n}
+            onSelect={onSelect}
+            onDelete={onDelete}
+            expandedIds={expandedIds}
+            setExpandedIds={setExpandedIds}
+            collapsePx={collapsePx}
+          />
+        ))}
       </div>
 
-      {overflowing ? (
-        <button
-          className="text-xs mt-2"
-          onClick={(e) => {
-            e.stopPropagation();
-            if (note.id == null) return;
-            setExpandedIds((s) => {
-              const copy = new Set(s);
-              if (copy.has(note.id!)) copy.delete(note.id!);
-              else copy.add(note.id!);
-              return copy;
-            });
-          }}
-        >
-          {expanded ? 'Show less' : 'Read more'}
-        </button>
-      ) : null}
-    </article>
+    </div>
   );
 }

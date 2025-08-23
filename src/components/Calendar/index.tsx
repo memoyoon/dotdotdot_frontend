@@ -56,11 +56,11 @@ export default function CalendarGrid() {
           <div className="text-sm text-gray-500">Yearly overview</div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="relative">
+          <div className="relative -z-10">
             <select
               value={year}
               onChange={(e) => { setYear(Number(e.target.value)); setExpandedMonth(null); }}
-              className="px-4 py-2 rounded-md border bg-white dark:bg-neutral-900 text-base appearance-none pr-10"
+              className="px-4 py-2 rounded-md border bg-white text-base appearance-none pr-10"
               aria-label="Select year"
             >
               {yearOptions.map((yOpt) => (
@@ -83,10 +83,10 @@ export default function CalendarGrid() {
             tabIndex={0}
             onClick={() => openMonth(m)}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') openMonth(m); }}
-            className={`border rounded-lg bg-white dark:bg-neutral-900 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-150 overflow-hidden ${expandedMonth === m ? 'ring-2 ring-indigo-300 dark:ring-indigo-600' : ''}`}
+            className={`border rounded-lg bg-white cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-150 overflow-hidden ${expandedMonth === m ? 'ring-2 ring-indigo-300' : ''}`}
             aria-expanded={expandedMonth === m}
           >
-            <div className="px-4 py-3 bg-gradient-to-r from-gray-100 to-white dark:from-neutral-800 dark:to-neutral-900">
+            <div className="px-4 py-3 bg-gradient-to-r from-gray-100 to-white">
               <div className="flex items-center justify-between">
                 <div className="font-medium text-lg">{MONTH_NAMES[m - 1]}</div>
                 <button
@@ -167,7 +167,7 @@ function MonthDetail({ year, month, onDateClick, compact }: { year: number; mont
               d ? (
                 <button
                   key={di}
-                  className={`w-full ${small ? 'h-8 text-xs' : 'h-10 text-sm'} rounded-md ${marked.has(`${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`) ? 'bg-gray-300 dark:bg-neutral-700' : 'bg-gray-50 dark:bg-neutral-800'}`}
+                  className={`w-full ${small ? 'h-8 text-xs' : 'h-10 text-sm'} rounded-md ${marked.has(`${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`) ? 'bg-gray-300' : 'bg-gray-50'}`}
                   onClick={() => onDateClick(year, month, d)}
                 >
                   {d}
